@@ -16,6 +16,10 @@ module Api
       def get_access_token
         new.send(:get_access_token)
       end
+
+      def fetch_saved_albums
+        new.send(:fetch_saved_albums)
+      end
     end
 
     attr_reader :client_id, :client_secret
@@ -26,7 +30,7 @@ module Api
     end
 
 
-    private
+    protected
 
     # Returns a valid (not expired) access token object,
     # or nil if token refresh didn't succeed.
@@ -83,6 +87,36 @@ module Api
         log_response("Failed to revalidate the access token", response, :error)
       end
     end
+
+    def fetch_saved_albums
+      base_url = URI("https://api.spotify.com/v1/me/albums")
+      headers = {
+        "Authorization": "Bearer #{ get_access_token.access_token }"
+      }
+      query_params = URI.encode_www_form({
+                                           limit: 5
+                                         })
+      uri = URI("#{ base_url }?#{ query_params }")
+      results = []
+
+      loop do
+        response = Net::HTTP.get_response(uri, headers)
+        if response.is_a? Net::HTTPSuccess
+          data = JSON.parse(response.body)
+          results << data
+          next_url = data["next"]
+          uri = URI(next_url) if next_url
+          break unless next_url and uri
+        else
+          log_response("Failed to get saved albums", response, :error)
+          break
+        end
+      end
+      results
+    end
+
+
+    private
 
     def request_token(data)
       uri = URI("https://accounts.spotify.com/api/token")

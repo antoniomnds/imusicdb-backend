@@ -12,7 +12,7 @@ class SpotifyOauthController < ApplicationController
       response_type: "code",
       redirect_uri: ::Api::SpotifyClient::REDIRECT_URI,
       state: state,
-      scopes: "user-library-read"
+      scope: "user-library-read"
     }
     query = URI.encode_www_form(query_params)
     url = "#{ base_url }?#{ query }"

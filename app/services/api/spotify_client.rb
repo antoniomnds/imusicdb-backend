@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Api
-  class SpotifyClient
+  class SpotifyClient < Client
     if Rails.env.local?
       REDIRECT_URI = "http://localhost:3000/spotify_oauth/callback".freeze
     else
@@ -93,19 +93,6 @@ module Api
       req.body = data
       Net::HTTP.start(uri.hostname, use_ssl: true) do |http|
         http.request(req)
-      end
-    end
-
-    def log_response(message, response, type = :info)
-      log_message = %Q(
-          ERROR: #{message}
-          Response message: #{ response.message }
-          Response body: #{ response.body }
-        )
-      if type == :info
-        Rails.logger.info(log_message)
-      else
-        Rails.logger.error(log_message)
       end
     end
   end

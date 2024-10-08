@@ -1,6 +1,13 @@
 class ApplicationController < ActionController::API
+  before_action :authorize
+
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
+  def authorize
+    return if ::Api::SpotifyClient.get_access_token
+
+    redirect_to spotify_oauth_request_authorization_url, status: :see_other
+  end
 
   private
 

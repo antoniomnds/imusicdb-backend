@@ -1,9 +1,7 @@
 class SpotifyOauthController < ApplicationController
-  def authorize
-    if Api::SpotifyClient.get_access_token
-      return head :no_content
-    end
+  skip_before_action :authorize, only: %i[request_authorization callback]
 
+  def request_authorization
     base_url = URI("https://accounts.spotify.com/authorize")
     state = SecureRandom.hex(24) # to protect against CSRF
     Rails.cache.write(state, true, expires_in: 10.minutes)

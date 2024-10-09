@@ -11,5 +11,9 @@ Rails.application.routes.draw do
   get "spotify_oauth/request_authorization"
   get "spotify_oauth/callback"
 
-  get "albums/me"
+  namespace :api do
+    namespace :v1 do
+      get "albums/me"
+    end
+  end
 end

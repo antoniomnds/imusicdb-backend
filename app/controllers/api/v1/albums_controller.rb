@@ -1,4 +1,4 @@
-class AlbumsController < ApplicationController
+class Api::V1::AlbumsController < ApplicationController
   def me
     albums = AlbumsService.saved_albums(params[:refresh] || false)
 

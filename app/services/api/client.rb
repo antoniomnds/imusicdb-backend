@@ -12,11 +12,7 @@ module Api
           Response message: #{ response.message }
           Response body: #{ response.body }
         )
-      if type == :info
-        Rails.logger.info(log_message)
-      else
-        Rails.logger.error(log_message)
-      end
+      Rails.logger.send(type) { log_message }
     end
   end
 end

@@ -1,0 +1,3 @@
+refresh_saved_albums_job:
+  cron: "*/10 * * * *"
+  class: "RefreshSavedAlbumsJob"

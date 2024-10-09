@@ -10,11 +10,11 @@ module Api
 
     class << self
       def fetch_access_token(code)
-        new.send(:fetch_access_token, code)
+        new.fetch_access_token(code)
       end
 
       def get_access_token
-        new.send(:get_access_token)
+        new.get_access_token
       end
     end
 
@@ -24,9 +24,6 @@ module Api
       @client_id = ENV["SPOTIFY_CLIENT_ID"]
       @client_secret = ENV["SPOTIFY_CLIENT_SECRET"]
     end
-
-
-    private
 
     # Returns a valid (not expired) access token object,
     # or nil if token refresh didn't succeed.
@@ -83,6 +80,9 @@ module Api
         log_response("Failed to revalidate the access token", response, :error)
       end
     end
+
+
+    private
 
     def request_token(data)
       uri = URI("https://accounts.spotify.com/api/token")

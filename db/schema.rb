@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_08_150700) do
+ActiveRecord::Schema[7.2].define(version: 2024_10_08_232352) do
   create_table "albums", force: :cascade do |t|
     t.string "name", null: false
     t.string "album_type"
@@ -22,7 +22,9 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_08_150700) do
     t.integer "popularity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
     t.index ["spotify_id"], name: "index_albums_on_spotify_id", unique: true
+    t.index ["user_id"], name: "index_albums_on_user_id"
   end
 
   create_table "albums_artists", id: false, force: :cascade do |t|
@@ -61,12 +63,26 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_08_150700) do
     t.datetime "expires_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id"
     t.index ["access_token"], name: "index_oauth_access_tokens_on_access_token", unique: true
     t.index ["refresh_token"], name: "index_oauth_access_tokens_on_refresh_token", unique: true
+    t.index ["user_id"], name: "index_oauth_access_tokens_on_user_id"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "display_name"
+    t.string "email", null: false
+    t.string "spotify_id", null: false
+    t.string "country"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+  end
+
+  add_foreign_key "albums", "users"
   add_foreign_key "albums_artists", "albums"
   add_foreign_key "albums_artists", "artists"
   add_foreign_key "albums_genres", "albums"
   add_foreign_key "albums_genres", "genres"
+  add_foreign_key "oauth_access_tokens", "users"
 end

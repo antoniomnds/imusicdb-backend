@@ -10,7 +10,7 @@ class SpotifyOauthController < ApplicationController
       response_type: "code",
       redirect_uri: ::Api::SpotifyClient::REDIRECT_URI,
       state: state,
-      scope: "user-library-read"
+      scope: "user-library-read user-read-email"
     }
     query = URI.encode_www_form(query_params)
     url = "#{ base_url }?#{ query }"
@@ -35,7 +35,8 @@ class SpotifyOauthController < ApplicationController
       return render json: { error: "Did not receive the authorization code. Return and try again." }, status: :unauthorized
     end
 
-    ::Api::SpotifyClient.fetch_access_token(authorization_code)
+    access_token = ::Api::SpotifyClient.fetch_access_token(authorization_code)
+    self.current_user = ::Api::SpotifyClient.fetch_user_info(access_token)
 
     render json: "Authorization granted successfully.", status: :ok
   end

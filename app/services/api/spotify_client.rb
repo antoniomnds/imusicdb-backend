@@ -13,20 +13,25 @@ module Api
         new.send(:fetch_access_token, code)
       end
 
-      def get_access_token
-        new.send(:get_access_token)
+      def get_access_token(user)
+        new(user).send(:get_access_token)
       end
 
-      def fetch_saved_albums
-        new.send(:fetch_saved_albums)
+      def fetch_saved_albums(user)
+        new(user).send(:fetch_saved_albums)
+      end
+
+      def fetch_user_info(access_token)
+        new.send(:fetch_user_info, access_token)
       end
     end
 
-    attr_reader :client_id, :client_secret
+    attr_reader :client_id, :client_secret, :user
 
-    def initialize
+    def initialize(user = nil)
       @client_id = ENV["SPOTIFY_CLIENT_ID"]
       @client_secret = ENV["SPOTIFY_CLIENT_SECRET"]
+      @user = user
     end
 
 
@@ -35,7 +40,7 @@ module Api
     # Returns a valid (not expired) access token object,
     # or nil if token refresh didn't succeed.
     def get_access_token
-      access_token = OauthAccessToken.last
+      access_token = user.oauth_access_token
       if access_token&.expired?
         access_token = refresh_token(access_token)
       end
@@ -58,8 +63,8 @@ module Api
             refresh_token: data["refresh_token"],
             expires_at: DateTime.now + data["expires_in"].seconds
           )
-        rescue ActiveRecord::RecordInvalid
-          Rails.logger.error("Failed to save the access token")
+        rescue ActiveRecord::RecordInvalid => e
+          Rails.logger.error("Failed to save the access token: #{ e.message }")
         end
       else
         log_response("Failed to authenticate", response, :error)
@@ -113,6 +118,29 @@ module Api
         end
       end
       results
+    end
+
+    def fetch_user_info(token)
+      uri = URI("https://api.spotify.com/v1/me")
+      headers = {
+        "Authorization": "Bearer #{ token.access_token }"
+      }
+      response = Net::HTTP.get_response(uri, headers)
+      if response.is_a? Net::HTTPSuccess
+        data = JSON.parse(response.body)
+        user = nil
+        ActiveRecord::Base.transaction do
+          user = User.find_or_create_by!(email: data["email"]) do |u|
+            u.display_name = data["display_name"]
+            u.spotify_id = data["id"]
+            u.country = data["country"]
+          end
+          token.update(user: user)
+        end
+        user
+      else
+        log_response("Failed to get user information", response, :error)
+      end
     end
 
 

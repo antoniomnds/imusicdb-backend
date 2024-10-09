@@ -2,9 +2,15 @@
 
 class AlbumsService
   class << self
-    def saved_albums(refresh)
-      new.send(:saved_albums, refresh)
+    def saved_albums(user, refresh)
+      new(user).send(:saved_albums, refresh)
     end
+  end
+
+  attr_reader :user
+
+  def initialize(user)
+    @user = user
   end
 
 
@@ -12,43 +18,47 @@ class AlbumsService
 
   def saved_albums(refresh)
     if refresh
-      results = ::Api::SpotifyClient.fetch_saved_albums
-      results.each do |result|
-        process_saved_album(result)
-      end
+      results = ::Api::SpotifyClient.fetch_saved_albums(user)
+      albums = process_saved_albums(results)
+      return albums
     end
-    Album.all # TODO restrict by user
+    Album.where(user: user)
   end
 
 
   private
 
-  def process_saved_album(result)
+  def process_saved_albums(results)
+    albums = []
     ActiveRecord::Base.transaction do
-      result["items"].each do |item|
-        album_data = item["album"]
-        artists = []
-        album_data["artists"].each do |artist_data|
-          artists << Artist.find_or_create_by!(spotify_id: artist_data["id"]) do |a|
-            a.name = artist_data["name"]
+      results.each do |result|
+        result["items"].each do |item|
+          album_data = item["album"]
+          artists = []
+          album_data["artists"].each do |artist_data|
+            artists << Artist.find_or_create_by!(spotify_id: artist_data["id"]) do |a|
+              a.name = artist_data["name"]
+            end
           end
-        end
-        genres = []
-        album_data["genres"].each do |genre_data|
-          genres << Genre.find_or_create_by!(name: genre_data)
-        end
-        Album.find_or_create_by!(spotify_id: album_data["id"]) do |al|
-          al.name = album_data["name"]
-          al.added_at = item["added_at"]
-          al.album_type = album_data["type"]
-          al.total_tracks = album_data["total_tracks"]
-          al.release_date = album_data["release_date"]
-          al.label = album_data["label"]
-          al.popularity = album_data["popularity"]
-          al.artists << artists
-          al.genres << genres
+          genres = []
+          album_data["genres"].each do |genre_data|
+            genres << Genre.find_or_create_by!(name: genre_data)
+          end
+          albums << Album.find_or_create_by!(spotify_id: album_data["id"]) do |al|
+            al.name = album_data["name"]
+            al.added_at = item["added_at"]
+            al.album_type = album_data["type"]
+            al.total_tracks = album_data["total_tracks"]
+            al.release_date = album_data["release_date"]
+            al.label = album_data["label"]
+            al.popularity = album_data["popularity"]
+            al.artists << artists
+            al.genres << genres
+            al.user = user
+          end
         end
       end
     end
+    albums
   end
 end

@@ -1,4 +1,4 @@
-class SpotifyOauthController < ApplicationController
+class Api::V1::SpotifyOauthController < ApplicationController
   skip_before_action :authorize, only: %i[request_authorization callback]
 
   def request_authorization
@@ -8,8 +8,7 @@ class SpotifyOauthController < ApplicationController
     query_params = {
       client_id: ENV["SPOTIFY_CLIENT_ID"],
       response_type: "code",
-      redirect_uri: ::Api::SpotifyClient::REDIRECT_URI,
-      state: state,
+      redirect_uri: api_v1_spotify_oauth_callback_url,
       scope: "user-library-read user-read-email"
     }
     query = URI.encode_www_form(query_params)
@@ -24,20 +23,13 @@ class SpotifyOauthController < ApplicationController
     end
 
     authorization_code = params[:code]
-    received_state = params[:state]
-    cached_state = Rails.cache.read(received_state)
-
-    unless cached_state
-      return render json: { error: "State mismatch. Possible CSRF. Return and try again." }, status: :unauthorized
-    end
-
     unless authorization_code
       return render json: { error: "Did not receive the authorization code. Return and try again." }, status: :unauthorized
     end
 
-    access_token = ::Api::SpotifyClient.fetch_access_token(authorization_code)
-    self.current_user = ::Api::SpotifyClient.fetch_user_info(access_token)
+    token = ::Api::SpotifyClient.fetch_access_token(authorization_code, api_v1_spotify_oauth_callback_url)
+    ::Api::SpotifyClient.fetch_user_info(token)
 
-    render json: "Authorization granted successfully.", status: :ok
+    render json: { token: token.access_token }, status: :ok
   end
 end

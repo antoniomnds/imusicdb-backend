@@ -2,15 +2,9 @@
 
 module Api
   class SpotifyClient < Client
-    if Rails.env.local?
-      REDIRECT_URI = "http://localhost:3000/spotify_oauth/callback".freeze
-    else
-      raise NotImplementedError("Oauth redirect URI not defined.")
-    end
-
     class << self
-      def fetch_access_token(code)
-        new.send(:fetch_access_token, code)
+      def fetch_access_token(code, redirect_url)
+        new.send(:fetch_access_token, code, redirect_url)
       end
 
       def get_access_token(user)
@@ -47,11 +41,11 @@ module Api
       access_token
     end
 
-    def fetch_access_token(code)
+    def fetch_access_token(code, redirect_url)
       data = URI.encode_www_form({
                                    grant_type: "authorization_code",
                                    code: code,
-                                   redirect_uri: REDIRECT_URI
+                                   redirect_uri: redirect_url
                                  })
       response = request_token(data)
       if response.is_a?(Net::HTTPSuccess)

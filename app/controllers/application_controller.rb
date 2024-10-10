@@ -4,19 +4,18 @@ class ApplicationController < ActionController::API
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
   def authorize
-    return if current_user && ::Api::SpotifyClient.get_access_token(current_user)
-
-    redirect_to spotify_oauth_request_authorization_url, status: :see_other
+    unless current_user
+      render json: { error: "You have to authenticate." }, status: :unauthorized
+    end
   end
 
   def current_user
-    @current_user ||= Rails.cache.read("current_user") &&
-      User.find_by(id: Rails.cache.read("current_user"))
+    access_token = request.headers["HTTP_AUTHORIZATION"]&.match?(/Bearer \w+/) &&
+      request.headers["HTTP_AUTHORIZATION"].gsub(/Bearer /, "")
+
+    @current_user ||= access_token && OauthAccessToken.find_by(access_token: access_token)&.user
   end
 
-  def current_user=(user)
-    Rails.cache.write("current_user", user.id)
-  end
 
   private
 

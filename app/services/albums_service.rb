@@ -3,7 +3,7 @@
 class AlbumsService
   class << self
     def saved_albums(user, refresh)
-      new(user).send(:saved_albums, refresh)
+      new(user).saved_albums(refresh)
     end
   end
 
@@ -12,9 +12,6 @@ class AlbumsService
   def initialize(user)
     @user = user
   end
-
-
-  protected
 
   def saved_albums(refresh)
     if refresh

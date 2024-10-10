@@ -53,4 +53,7 @@ group :development, :test do
 
   # For generating factories in tests [https://github.com/thoughtbot/factory_bot]
   gem "factory_bot_rails"
+
+  # Fake data generation for testing purposes
+  gem "faker"
 end

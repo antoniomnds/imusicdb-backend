@@ -3,6 +3,6 @@ FactoryBot.define do
     app { Faker::App.name }
     access_token { Faker::Internet.device_token }
     refresh_token { Faker::Internet.device_token }
-    expires_at { Faker::Time.between(from: DateTime.now, to: DateTime.now) }
+    expires_at { Faker::Time.between(from: DateTime.now, to: DateTime.now + 1.hour) }
   end
 end

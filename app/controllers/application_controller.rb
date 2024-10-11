@@ -4,16 +4,31 @@ class ApplicationController < ActionController::API
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
   def authorize
-    unless current_user
-      render json: { error: "You have to authenticate." }, status: :unauthorized
+    auth_header = request.headers["HTTP_AUTHORIZATION"]
+    access_token = auth_header&.match?(/Bearer \w+/) && auth_header.gsub(/Bearer /, "")
+    token = access_token && OauthAccessToken.find_by(access_token: access_token)
+
+    unless token
+      return render json: { error: "You have to authenticate." }, status: :unauthorized
     end
+
+    if token.expired?
+      new_token = ::Api::SpotifyClient.refresh_token(token)
+      unless new_token
+        return render json: { error: "Failed to refresh the token." }, status: :bad_request
+      end
+      response.set_header("Authorization", "Bearer #{ new_token.access_token }")
+    end
+
+    self.current_user = token.user
   end
 
   def current_user
-    access_token = request.headers["HTTP_AUTHORIZATION"]&.match?(/Bearer \w+/) &&
-      request.headers["HTTP_AUTHORIZATION"].gsub(/Bearer /, "")
+    @current_user
+  end
 
-    @current_user ||= access_token && OauthAccessToken.find_by(access_token: access_token)&.user
+  def current_user=(user)
+    @current_user = user
   end
 
 

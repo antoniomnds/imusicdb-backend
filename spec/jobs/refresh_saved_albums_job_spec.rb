@@ -36,5 +36,4 @@ RSpec.describe RefreshSavedAlbumsJob, type: :job do
       expect { RefreshSavedAlbumsJob.perform_now }.not_to raise_error
     end
   end
-
 end

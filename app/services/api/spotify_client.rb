@@ -4,19 +4,19 @@ module Api
   class SpotifyClient < Client
     class << self
       def fetch_access_token(code, redirect_url)
-        new.send(:fetch_access_token, code, redirect_url)
+        new.fetch_access_token(code, redirect_url)
       end
 
-      def get_access_token(user)
-        new(user).send(:get_access_token)
+      def refresh_token(token)
+        new.refresh_token(token)
       end
 
       def fetch_saved_albums(user)
-        new(user).send(:fetch_saved_albums)
+        new(user).fetch_saved_albums
       end
 
       def fetch_user_info(access_token)
-        new.send(:fetch_user_info, access_token)
+        new.fetch_user_info(access_token)
       end
     end
 
@@ -29,16 +29,8 @@ module Api
     end
 
 
-    protected
-
-    # Returns a valid (not expired) access token object,
-    # or nil if token refresh didn't succeed.
     def get_access_token
-      access_token = user.oauth_access_token
-      if access_token&.expired?
-        access_token = refresh_token(access_token)
-      end
-      access_token
+      user&.oauth_access_token
     end
 
     def fetch_access_token(code, redirect_url)
@@ -58,10 +50,12 @@ module Api
             expires_at: DateTime.now + data["expires_in"].seconds
           )
         rescue ActiveRecord::RecordInvalid => e
-          Rails.logger.error("Failed to save the access token: #{ e.message }")
+          Rails.logger.error { "Failed to save the access token: #{ e.message }" }
+          nil
         end
       else
         log_response("Failed to authenticate", response, :error)
+        nil
       end
     end
 
@@ -79,11 +73,14 @@ module Api
             refresh_token: data["refresh_token"] || token.refresh_token,
             expires_at: DateTime.now + data["expires_in"].seconds
           )
-        rescue ActiveRecord::RecordInvalid
-          Rails.logger.error("Failed to update the access token")
+          token
+        rescue ActiveRecord::RecordInvalid => e
+          Rails.logger.error { "Failed to update the access token: #{ e.message }" }
+          nil
         end
       else
         log_response("Failed to revalidate the access token", response, :error)
+        nil
       end
     end
 

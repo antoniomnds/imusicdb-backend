@@ -30,6 +30,10 @@ module Api
         end
 
         token = ::Api::SpotifyClient.fetch_access_token(authorization_code, api_v1_spotify_oauth_callback_url)
+        unless token
+          return render_json errors: "Failed to get the access token", status: :bad_request
+        end
+
         ::Api::SpotifyClient.fetch_user_info(token)
 
         render_json data: token.access_token, status: :ok

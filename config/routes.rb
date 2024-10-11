@@ -15,10 +15,13 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "application#authorize"
 
-  namespace :api do
+  namespace :api, defaults: { format: :json } do
     namespace :v1 do
+      # Public endpoints
       get "spotify_oauth/request_authorization"
       get "spotify_oauth/callback"
+
+      # Private endpoints
       get "albums/me"
     end
   end

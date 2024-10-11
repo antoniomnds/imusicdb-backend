@@ -31,7 +31,6 @@ RSpec.describe "SpotifyOauth Request", type: :request do
 
     context "when authorization succeeds" do
       let(:oauth_access_token) { create(:oauth_access_token) }
-      let(:user) { create(:user) }
       let(:authorization_code) { "valid_code" }
       let(:redirect_url) { api_v1_spotify_oauth_callback_url }
 
@@ -48,7 +47,7 @@ RSpec.describe "SpotifyOauth Request", type: :request do
         get api_v1_spotify_oauth_callback_path(code: authorization_code)
 
         expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)["token"]).to eq(oauth_access_token.access_token)
+        expect(JSON.parse(response.body)["data"]).to eq(oauth_access_token.access_token)
         expect(::Api::SpotifyClient).to have_received(:fetch_access_token).with(authorization_code, redirect_url)
         expect(::Api::SpotifyClient).to have_received(:fetch_user_info).with(oauth_access_token)
       end

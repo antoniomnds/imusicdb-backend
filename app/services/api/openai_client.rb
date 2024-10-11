@@ -4,7 +4,7 @@ module Api
   class OpenaiClient < Client
     class << self
       def send_prompt(prompt)
-        new.send(:create_completion, prompt)
+        new.create_completion(prompt)
       end
     end
 
@@ -13,8 +13,6 @@ module Api
     def initialize
       @api_key = ENV["OPENAI_API_KEY"]
     end
-
-    protected
 
     def create_completion(prompt)
       base_url = URI("https://api.openai.com/v1/chat/completions")

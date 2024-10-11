@@ -2,8 +2,6 @@ require 'rails_helper'
 
 RSpec.describe "Application Request", type: :request do
   describe "Authorized access to a resource" do
-    let(:user) { create(:user) }
-
     context "with an expired access token" do
       let(:token) { create(:oauth_access_token, expires_at: DateTime.now - 30.minutes) }
       let(:renewed_token) { create(:oauth_access_token) }

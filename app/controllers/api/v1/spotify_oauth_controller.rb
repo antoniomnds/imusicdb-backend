@@ -5,8 +5,6 @@ module Api
 
       def request_authorization
         base_url = URI("https://accounts.spotify.com/authorize")
-        state = SecureRandom.hex(24) # to protect against CSRF
-        Rails.cache.write(state, true, expires_in: 10.minutes)
         query_params = {
           client_id: ENV["SPOTIFY_CLIENT_ID"],
           response_type: "code",

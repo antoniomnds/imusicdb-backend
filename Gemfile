@@ -29,6 +29,12 @@ gem "bootsnap", require: false
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 # gem "rack-cors"
 
+# For background processing
+gem "sidekiq"
+
+# For scheduling background jobs
+gem "sidekiq-cron"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -41,4 +47,13 @@ group :development, :test do
 
   # Load environment variables from .env into ENV in development
   gem "dotenv-rails"
+
+  # For generating and running tests with RSpec [https://rspec.info/]
+  gem "rspec-rails", "~> 7.0"
+
+  # For generating factories in tests [https://github.com/thoughtbot/factory_bot]
+  gem "factory_bot_rails"
+
+  # Fake data generation for testing purposes
+  gem "faker"
 end

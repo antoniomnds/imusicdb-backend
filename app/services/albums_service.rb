@@ -19,7 +19,7 @@ class AlbumsService
       albums = process_saved_albums(results)
       return albums
     end
-    Album.where(user: user)
+    Album.for_user(user)
   end
 
 
@@ -41,9 +41,8 @@ class AlbumsService
           album_data["genres"].each do |genre_data|
             genres << Genre.find_or_create_by!(name: genre_data)
           end
-          albums << Album.find_or_create_by!(spotify_id: album_data["id"]) do |al|
+          album = Album.find_or_create_by!(spotify_id: album_data["id"]) do |al|
             al.name = album_data["name"]
-            al.added_at = item["added_at"]
             al.album_type = album_data["type"]
             al.total_tracks = album_data["total_tracks"]
             al.release_date = album_data["release_date"]
@@ -51,8 +50,9 @@ class AlbumsService
             al.popularity = album_data["popularity"]
             al.artists << artists
             al.genres << genres
-            al.user = user
           end
+          album.users_albums.create!(user:, album:, added_at: item["added_at"])
+          albums << album
         end
       end
     end

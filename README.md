@@ -18,32 +18,25 @@ Create a React App (https://vite.dev/guide/)
   - React App PRs should be reviewed by (Marcos Germano)
 
 ### RAILS
-############################# MONDAY #############################
 - Create Rails Api module (ETD : 1 hour)(Antonio ETD: 1h)
 - Add the proper configuration to start to communicate with Spotify, openAI (ETD: 2 to 3 hours)(Antonio ETD: 3h)
 
 ### RAILS API SHOULD :
 
-############################# TUESDAY #############################
 # Get User's Saved Albums (Spotify) and persist data (ETD : 3 hours)(tests)(Antonio ETD: 4h)
-# - almost 2 days: had to go back and start to use a gem that wraps the Spotify Web API in an attempt to accelerate the remaining tasks,
-#   but instead it only gave further problems. Went back to the initial solution.
 (data must be updated by a Job every 10 minutes)
 (the user can also trigger this update on the react app)
 
-############################# WEDNESDAY #############################
 ## Use openAi to get 5 Similar Artists on each saved album (ETD: 1 to 2 days)(tests)(Antonio ETD: 2 days)
 (prompt after an album is saved)
 (React APP should have a proper input to prompt (Artists, Genre and Albums) should work based on a simple prompt, **EX: "give me artists that are within the same genre as Cold Play**)(Save all results marked in REACT APP as "valid Results")
 (EX: "give me all Madonna Albums" [valid results (clear prompt and persist data) or ignore (clear prompt and results) ])
 
-############################# THURSDAY #############################
 # Get each Artist from saved albums and store METADATA (ETD : 3 hours)(tests)(Antonio ETD: 4h)
 
 # Add  personal notes each album and artist (ETD : 3 hours)(tests)(Antonio ETD: 3h)
 - NOTE: https://guides.rubyonrails.org/association_basics.html#polymorphic-associations
 
-############################# FRIDAY #############################
 # Log all Calls between Spotify Api, openAi Api, React App (ETD : 3 hours)(tests)(Antonio ETD: 3h)
 (source, payload, response)
 

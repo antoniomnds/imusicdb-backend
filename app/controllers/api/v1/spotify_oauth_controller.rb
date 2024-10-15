@@ -33,8 +33,12 @@ module Api
         end
 
         ::Api::SpotifyClient.fetch_user_info(token)
+        encoded_access_token = JwtService.encode(token.access_token)
 
-        render_json data: token.access_token, status: :ok
+        # fragment identifiers are not logged like query params
+        redirect_url = "#{Rails.configuration.frontend_url}#access_token=#{encoded_access_token}"
+
+        redirect_to redirect_url, allow_other_host: true, status: :see_other
       end
     end
   end

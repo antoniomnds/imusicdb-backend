@@ -6,8 +6,14 @@ class ApplicationController < ActionController::API
   def authorize
     auth_header = request.headers["HTTP_AUTHORIZATION"]
     access_token = auth_header&.match?(/Bearer \w+/) && auth_header.gsub(/Bearer /, "")
-    token = access_token && OauthAccessToken.find_by(access_token: access_token)
 
+    begin
+      decoded_token = JwtService.decode(access_token)
+    rescue JWT::DecodeError
+      return render json: { error: "Invalid token." }, status: :unauthorized
+    end
+
+    token = decoded_token && OauthAccessToken.find_by(access_token: decoded_token)
     unless token
       return render json: { error: "You have to authenticate." }, status: :unauthorized
     end
@@ -17,7 +23,9 @@ class ApplicationController < ActionController::API
       unless new_token
         return render json: { error: "Failed to refresh the token." }, status: :bad_request
       end
-      response.set_header("Authorization", "Bearer #{ new_token.access_token }")
+      encoded_access_token = JwtService.encode(new_token.access_token)
+      response.set_header("Authorization", "Bearer #{ encoded_access_token }")
+      token = new_token
     end
 
     self.current_user = token.user

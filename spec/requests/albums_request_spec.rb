@@ -14,9 +14,12 @@ RSpec.describe "Albums Request", type: :request do
     let(:user) { create(:user) }
     let(:token) { create(:oauth_access_token, user:) }
 
-    it "returns saved albums" do
+    before do
       allow(AlbumsService).to receive(:saved_albums).with(user, false).and_return(albums)
+      allow(JwtService).to receive(:decode).and_return(token.access_token)
+    end
 
+    it "returns saved albums" do
       get api_v1_albums_me_path, headers: { "HTTP_AUTHORIZATION": "Bearer #{ token.access_token }" }
 
       expect(response).to have_http_status(:ok)

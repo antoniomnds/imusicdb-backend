@@ -8,6 +8,7 @@ RSpec.describe "Application Request", type: :request do
 
       before do
         allow(::Api::SpotifyClient).to receive(:refresh_token).with(token).and_return(renewed_token)
+        allow(JwtService).to receive(:decode).and_return(token.access_token)
       end
 
       it "returns the resource and the refreshed token" do

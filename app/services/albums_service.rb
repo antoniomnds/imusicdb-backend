@@ -51,7 +51,9 @@ class AlbumsService
             al.artists << artists
             al.genres << genres
           end
-          album.users_albums.create!(user:, album:, added_at: item["added_at"])
+          album.users_albums.find_or_create_by!(user:, album:) do |ua|
+            ua.added_at = item["added_at"]
+          end
           albums << album
         end
       end

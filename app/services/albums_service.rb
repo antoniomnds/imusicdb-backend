@@ -3,29 +3,37 @@
 class AlbumsService
   class << self
     def saved_albums(user, refresh)
-      new(user).saved_albums(refresh)
+      new.saved_albums(user, refresh)
+    end
+
+    def similar_albums(album)
+      new.similar_albums(album)
     end
   end
 
-  attr_reader :user
-
-  def initialize(user)
-    @user = user
-  end
-
-  def saved_albums(refresh)
+  def saved_albums(user, refresh)
     if refresh
       results = ::Api::SpotifyClient.fetch_saved_albums(user)
-      albums = process_saved_albums(results)
+      albums = process_saved_albums(results, user)
       return albums
     end
     Album.with_artists.with_genres.for_user(user)
   end
 
+  def similar_albums(album)
+    message = <<~HEREDOC.squish
+      Please tell me five similar albums to the album named #{album.name}
+      of artists #{ album.artists.map(&:name).join(",") } released in
+      #{ album.release_date }.
+    HEREDOC
+    result = Api::OpenaiClient.send_prompt(message)
+    process_similar_albums(result)
+  end
+
 
   private
 
-  def process_saved_albums(results)
+  def process_saved_albums(results, user)
     albums = []
     ActiveRecord::Base.transaction do
       results.each do |result|
@@ -57,6 +65,25 @@ class AlbumsService
           albums << album
         end
       end
+    end
+    albums
+  end
+
+  def process_similar_albums(result)
+    albums = []
+    result["albums"].each do |album_data|
+      album = Album.build.tap do |album|
+        %i[name release_date label total_tracks].each do |attr|
+          album.send("#{attr}=", album_data["#{attr}"])
+        end
+      end
+      album_data["artists"].each do |artist_data|
+        album.artists << Artist.build({name: artist_data["name"]})
+      end
+      album_data["genres"].each do |genre_data|
+        album.genres << Genre.build({name: genre_data["name"]})
+      end
+      albums << album
     end
     albums
   end

@@ -23,6 +23,9 @@ Rails.application.routes.draw do
 
       # Private endpoints
       resources :albums, only: %i[show] do
+        member do
+          get "similar"
+        end
         collection do
           get "me"
         end

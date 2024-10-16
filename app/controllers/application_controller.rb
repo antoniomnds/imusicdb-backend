@@ -13,6 +13,6 @@ class ApplicationController < ActionController::API
   private
 
   def not_found
-    render json: "The resource you're looking for was not found.", status: 404
+    render json: { errors: "The resource you're looking for was not found." }, status: 404
   end
 end

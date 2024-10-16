@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe "Albums Request", type: :request do
   describe "Unauthorized access to albums" do
     it "denies access to albums#me" do
-      get api_v1_albums_me_path
+      get me_api_v1_albums_path
 
       expect(response).to have_http_status(:unauthorized)
     end
@@ -20,7 +20,7 @@ RSpec.describe "Albums Request", type: :request do
     end
 
     it "returns saved albums" do
-      get api_v1_albums_me_path, headers: { "HTTP_AUTHORIZATION": "Bearer #{ token.access_token }" }
+      get me_api_v1_albums_path, headers: { "HTTP_AUTHORIZATION": "Bearer #{ token.access_token }" }
 
       expect(response).to have_http_status(:ok)
       expect(AlbumsService).to have_received(:saved_albums).with(user, false)

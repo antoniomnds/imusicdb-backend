@@ -12,7 +12,7 @@ RSpec.describe "Root Request", type: :request do
       end
 
       it "returns the resource and the refreshed token" do
-        get api_v1_albums_me_path, headers: { "HTTP_AUTHORIZATION": "Bearer #{ token.access_token }" }
+        get me_api_v1_albums_path, headers: { "HTTP_AUTHORIZATION": "Bearer #{ token.access_token }" }
 
         expect(response).to have_http_status(:ok)
         expect(response.headers["Authorization"]).not_to be_nil

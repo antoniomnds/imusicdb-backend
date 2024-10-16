@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe "Application Request", type: :request do
+RSpec.describe "Root Request", type: :request do
   describe "Authorized access to a resource" do
     context "with an expired access token" do
       let(:token) { create(:oauth_access_token, expires_at: DateTime.now - 30.minutes) }
@@ -8,6 +8,7 @@ RSpec.describe "Application Request", type: :request do
 
       before do
         allow(::Api::SpotifyClient).to receive(:refresh_token).with(token).and_return(renewed_token)
+        allow(JwtService).to receive(:decode).and_return(token.access_token)
       end
 
       it "returns the resource and the refreshed token" do

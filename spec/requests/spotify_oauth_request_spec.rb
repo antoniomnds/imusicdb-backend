@@ -33,6 +33,8 @@ RSpec.describe "SpotifyOauth Request", type: :request do
       let(:oauth_access_token) { create(:oauth_access_token) }
       let(:authorization_code) { "valid_code" }
       let(:redirect_url) { api_v1_spotify_oauth_callback_url }
+      let(:encoded_access_token) { "encoded_token" }
+      let(:mocked_frontend_url) { "http://localhost" }
 
       before do
         allow(::Api::SpotifyClient).to receive(:fetch_access_token)
@@ -41,13 +43,18 @@ RSpec.describe "SpotifyOauth Request", type: :request do
         allow(::Api::SpotifyClient).to receive(:fetch_user_info)
                                          .with(oauth_access_token)
                                          .and_return(user)
+        allow(Rails.application.config).to receive(:frontend_url)
+                                             .and_return(mocked_frontend_url)
+        allow(JwtService).to receive(:encode)
+                               .and_return(encoded_access_token)
       end
 
-      it "returns success" do
+      it "redirects to the frontend" do
         get api_v1_spotify_oauth_callback_path(code: authorization_code)
 
-        expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)["data"]).to eq(oauth_access_token.access_token)
+        expect(response).to have_http_status(:redirect)
+        expect(response).to redirect_to("#{mocked_frontend_url}#access_token=#{encoded_access_token}")
+
         expect(::Api::SpotifyClient).to have_received(:fetch_access_token).with(authorization_code, redirect_url)
         expect(::Api::SpotifyClient).to have_received(:fetch_user_info).with(oauth_access_token)
       end

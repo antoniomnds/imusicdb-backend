@@ -23,6 +23,7 @@ Rails.application.routes.draw do
 
       # Private endpoints
       get "albums/me"
+      get "users/me"
     end
   end
 

@@ -21,4 +21,6 @@ class Album < ApplicationRecord
             presence: true
 
   scope :for_user, ->(user) { joins(:users).where(users: user) }
+  scope :with_artists, -> { includes(:artists) }
+  scope :with_genres, -> { includes(:genres) }
 end

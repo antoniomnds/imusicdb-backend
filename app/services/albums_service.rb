@@ -19,7 +19,7 @@ class AlbumsService
       albums = process_saved_albums(results)
       return albums
     end
-    Album.for_user(user)
+    Album.with_artists.with_genres.for_user(user)
   end
 
 

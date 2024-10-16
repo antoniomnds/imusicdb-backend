@@ -4,7 +4,7 @@ module Api
       def me
         albums = AlbumsService.saved_albums(current_user, params[:refresh] || false)
 
-        render_json data: albums.to_json(except: %i[id created_at updated_at]), status: :ok
+        render_json data: ::AlbumBlueprint.render(albums), status: :ok
       end
     end
   end

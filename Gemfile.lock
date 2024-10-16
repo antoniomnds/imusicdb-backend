@@ -74,6 +74,7 @@ GEM
     ast (2.4.2)
     base64 (0.2.0)
     bigdecimal (3.1.8)
+    blueprinter (1.1.2)
     bootsnap (1.18.4)
       msgpack (~> 1.2)
     brakeman (6.2.1)
@@ -307,6 +308,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  blueprinter
   bootsnap
   brakeman
   debug

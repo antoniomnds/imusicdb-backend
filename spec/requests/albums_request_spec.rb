@@ -7,6 +7,10 @@ RSpec.describe "Albums Request", type: :request do
 
       expect(response).to have_http_status(:unauthorized)
     end
+
+    it "denies access to albums#show" do
+      # TODO
+    end
   end
 
   describe "Authorized access to albums" do
@@ -25,5 +29,9 @@ RSpec.describe "Albums Request", type: :request do
       expect(response).to have_http_status(:ok)
       expect(AlbumsService).to have_received(:saved_albums).with(user, false)
     end
+
+    # TODO test endpoint show
+    # TODO test endpoint similar
+    # TODO test endpoint create
   end
 end

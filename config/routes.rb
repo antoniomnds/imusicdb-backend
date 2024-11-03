@@ -22,7 +22,7 @@ Rails.application.routes.draw do
       get "spotify_oauth/callback"
 
       # Private endpoints
-      resources :albums, only: %i[show] do
+      resources :albums, only: %i[show create] do
         member do
           get "similar"
         end

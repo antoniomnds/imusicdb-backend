@@ -18,6 +18,14 @@ module Api
       def fetch_user_info(access_token)
         new.fetch_user_info(access_token)
       end
+
+      def search_album(user, album_data)
+        new(user).search_album(album_data)
+      end
+
+      def fetch_album(user, spotify_id)
+        new(user).fetch_album(spotify_id)
+      end
     end
 
     attr_reader :client_id, :client_secret, :user
@@ -134,6 +142,38 @@ module Api
       end
     end
 
+    def search_album(album_data)
+      base_url = URI("https://api.spotify.com/v1/search")
+      headers = { "Authorization": "Bearer #{ get_access_token.access_token }" }
+
+      artists_data = album_data["artists"].map { |artist_data| artist_data["name"] }.join(", ")
+      year_data = Date.parse(album_data["release_date"]).year
+      filters = "artist:#{artists_data} album:#{album_data["name"]} year:#{year_data}"
+      query_params = URI.encode_www_form({ q: filters, type: "album", limit: 1 })
+
+      uri = URI("#{ base_url }?#{ query_params }")
+      response = Net::HTTP.get_response(uri, headers)
+      debugger
+      if response.is_a? Net::HTTPSuccess
+        data = JSON.parse(response.body)
+        data.dig("albums", "items", 0, "id") # returns the spotify_id of the first album
+      else
+        log_response("Failed to get album", response, :error)
+      end
+    end
+
+    def fetch_album(spotify_id)
+      uri = URI("https://api.spotify.com/v1/albums/#{spotify_id}")
+      headers = {
+        "Authorization": "Bearer #{ get_access_token.access_token }"
+      }
+      response = Net::HTTP.get_response(uri, headers)
+      if response.is_a? Net::HTTPSuccess
+        JSON.parse(response.body)
+      else
+        log_response("Failed to get album", response, :error)
+      end
+    end
 
     private
 
